@@ -8,13 +8,13 @@ int err,
 		u,
 		sens1,
 		sens2,
-    grey=27,
+    grey=22,
     grey1=38,
     tim=0,
-		vline=10,
+		vline=5,
 		flag=0;
 
-float k=10;
+float k=1;
 
 void down()
 {
@@ -79,57 +79,25 @@ void detected()
   motor[motorD]=0;
 sleep(300);
   up();
-  sleep(3000);
+  motor[motorA]=-5;
+  motor[motorD]=-5;
+  sleep(1300);
+  motor[motorA]=0;
+  motor[motorD]=0;
+  sleep(1700);
   down();
   upline();
   }
-
-
-void lineleft()
-{
-		flag=0;
-		sens1=SensorValue[S4];
-		//sens2=SensorValue[S4];
-   	err=sens1-grey1;
-   	u=err*k;
-		motor[motorD]=-vline-u;
-		motor[motorA]=-vline+u;
-		if(u > 30 && tim==0)
-		{
-			tim=nPgmTime;
-		}
-		else if(u<=30)
-		{
-			tim=nPgmTime;
-		}
-		else if(nPgmTime - tim >= 1000)
-		{
-			flag=0;
-		}
-		sleep(1);
-}
 
 void line()
 {
 		flag=0;
 		sens1=SensorValue[S1];
-		//sens2=SensorValue[S4];
-   	err=sens1-grey1;
+		sens2=SensorValue[S4];
+   	err=sens1-sens2;
    	u=err*k;
 		motor[motorD]=-vline+u;
 		motor[motorA]=-vline-u;
-		if(u > 30 && tim==0)
-		{
-			tim=nPgmTime;
-		}
-		else if(u<=30)
-		{
-			tim=nPgmTime;
-		}
-		else if(nPgmTime - tim >= 1000)
-		{
-			flag=1;
-		}
 		sleep(1);
 }
 
@@ -140,28 +108,37 @@ void lineforw()
 		getJoystickSettings(joystick);
 		if(SensorValue[S2] <= grey+1 && SensorValue[S2] >= grey-1)
    {
-     motor[motorA]=50;
-     motor[motorD]=50;
+     motor[motorA]=10;
+     motor[motorD]=10;
    }
    else if(SensorValue[S2] < grey)
    {
-     motor[motorA]=50;
+     motor[motorA]=10;
      motor[motorD]=0;
    }
    else if(SensorValue[S2] > grey)
    {
      motor[motorA]=0;
-     motor[motorD]=50;
+     motor[motorD]=10;
    }
    sleep(1);}
 }
 
 void tocross()
 {
-	while(true){if(SensorValue[S1] < 17 && SensorValue[S4] < 17)break;
+	while(true){if(SensorValue[S1] < 27 && SensorValue[S4] < 27)break;
 		line();
 		sleep(1);
 	}
+	motor[motorA]=0;
+	motor[motorD]=0;
+	playTone(784, 50);
+	motor[motorA]=0;
+	motor[motorD]=0;
+	nMotorEncoder[motorA]=0;
+	motor[motorA]=5;
+	motor[motorD]=5;
+	sleep(500);
 	motor[motorA]=0;
 	motor[motorD]=0;
 	downline();
@@ -193,10 +170,9 @@ task main()
 		{ down();
 			while(joy1Btn(Btn9) != 1)
 				{ getJoystickSettings(joystick);
-					if(flag==0){line();}
-					else {lineleft();}
-					if(SensorValue[S3] < 6)   //s3
-								{  detected();
+					line();
+					if(SensorValue[S3] < 5)   //s3
+								{  detected(); /*tim=nPgmTime; while(nPgmTime-tim<=700)*/{line();}
 									 tocross();   break;
        		}
 				}
