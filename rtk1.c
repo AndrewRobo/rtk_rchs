@@ -24,10 +24,33 @@ void down()
 motor[motorC]=0;
 }
 
+
+void downline()
+{
+	nMotorEncoder[motorC]=0;
+	while(nMotorEncoder[motorC] > -150)
+{
+	motor[motorC]=-20;
+	sleep(1);
+}
+motor[motorC]=0;
+}
+
 void up()
 {
 	nMotorEncoder[motorC]=0;
 	while(nMotorEncoder[motorC] < 400)
+{
+	motor[motorC]=20;
+	sleep(1);
+}
+motor[motorC]=0;
+}
+
+void upline()
+{
+	nMotorEncoder[motorC]=0;
+	while(nMotorEncoder[motorC] < 200)
 {
 	motor[motorC]=20;
 	sleep(1);
@@ -45,17 +68,17 @@ void detected()
 
  nMotorEncoder[motorA]=0;
 
- while(nMotorEncoder[motorA] > -50)
-  {
-  	motor[motorA]=-20;
-  	motor[motorD]=-20;
-  	sleep(1);
-  }
 
+  	motor[motorA]=-1;
+  	motor[motorD]=-1;
+  	sleep(700);
 	motor[motorA]=0;
   motor[motorD]=0;
-
+sleep(300);
   up();
+  sleep(3000);
+  down();
+  upline();
   }
 
 
@@ -80,7 +103,7 @@ void tocross()
 	}
 	motor[motorA]=0;
 	motor[motorD]=0;
-	down();
+	downline();
 }
 
 task main()
