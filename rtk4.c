@@ -8,13 +8,27 @@ int err,
 		u,
 		sens1,
 		sens2,
-    grey=22,
+    grey=17,
     grey1=38,
     tim=0,
-		vline=5,
-		flag=0;
+		vline=10,
+		flag=0,
+		timefix=0;
 
-float k=1;
+float k=2;
+task emptyline()
+{
+	while(true)	{
+				flag=0;
+		sens1=SensorValue[S1];
+		sens2=SensorValue[S4];
+   	err=sens1-sens2;
+   	u=err*k;
+		motor[motorD]=-vline+u;
+		motor[motorA]=-vline-u;
+		sleep(1);
+}
+}
 
 void linezig2()
 {
@@ -78,6 +92,32 @@ motor[motorC]=0;
 }
 
 
+void forward()
+{
+	while(joy1Btn(Btn9) != 1)
+	{
+		getJoystickSettings(joystick);
+		motor[motorA]=100;
+		motor[motorD]=100;
+		sleep(1);
+	}
+}
+
+
+
+void backward()
+{
+	while(joy1Btn(Btn9) != 1)
+	{
+		getJoystickSettings(joystick);
+		motor[motorA]=-100;
+		motor[motorD]=-100;
+		sleep(1);
+	}
+}
+
+
+
 void downline()
 {
 	nMotorEncoder[motorC]=0;
@@ -122,21 +162,21 @@ void detected()
  nMotorEncoder[motorA]=0;
 
 
-  	motor[motorA]=-1;
-  	motor[motorD]=-1;
-  	sleep(700);
-	motor[motorA]=0;
-  motor[motorD]=0;
-sleep(300);
+//  	motor[motorA]=-1;
+//  	motor[motorD]=-1;
+//  	sleep(700);
+//	motor[motorA]=0;
+//  motor[motorD]=0;
+//sleep(300);
   up();
-  motor[motorA]=-5;
-  motor[motorD]=-5;
-  sleep(1300);
-  motor[motorA]=0;
-  motor[motorD]=0;
-  sleep(1700);
-  down();
-  upline();
+  startTask(emptyline);
+  sleep(5000);
+  stopTask(emptyline);
+  //motor[motorA]=0;
+  //motor[motorD]=0;
+  //sleep(1700);
+  //down();
+  //upline();
   }
 
 void line()
@@ -153,30 +193,56 @@ void line()
 
 void lineforw()
 {
-	while(true)
+
+   while(joy1Btn(Btn9) != 1)
 	{
 		getJoystickSettings(joystick);
 		if(SensorValue[S2] <= grey+1 && SensorValue[S2] >= grey-1)
    {
-     motor[motorA]=10;
-     motor[motorD]=10;
+     motor[motorA]=30;
+     motor[motorD]=30;
    }
    else if(SensorValue[S2] < grey)
    {
-     motor[motorA]=10;
+     motor[motorA]=30;
      motor[motorD]=0;
    }
    else if(SensorValue[S2] > grey)
    {
      motor[motorA]=0;
-     motor[motorD]=10;
+     motor[motorD]=30;
    }
    sleep(1);}
 }
 
+
+void lineforwup()
+{
+	while(joy1Btn(Btn9) != 1)
+	{
+		getJoystickSettings(joystick);
+		if(SensorValue[S2] <= grey+1 && SensorValue[S2] >= grey-1)
+  {
+     motor[motorA]=100;
+     motor[motorD]=10;
+   }
+   else if(SensorValue[S2] < grey)
+   {
+     motor[motorA]=100;
+     motor[motorD]=0;
+   }
+   else if(SensorValue[S2] > grey)
+   {
+     motor[motorA]=0;
+     motor[motorD]=100;
+   }
+   sleep(1);}
+}
+
+
 void tocross()
 {
-	while(true){if(SensorValue[S1] < 27 && SensorValue[S4] < 27)break;
+	while(true){if(SensorValue[S1] < 15 && SensorValue[S4] < 15)break;
 		line();
 		sleep(1);
 	}
@@ -186,9 +252,9 @@ void tocross()
 	motor[motorA]=0;
 	motor[motorD]=0;
 	nMotorEncoder[motorA]=0;
-	motor[motorA]=5;
-	motor[motorD]=5;
-	sleep(500);
+	motor[motorA]=100;
+	motor[motorD]=100;
+	sleep(1500);
 	motor[motorA]=0;
 	motor[motorD]=0;
 	downline();
@@ -196,8 +262,6 @@ void tocross()
 
 task main()
 {
-
-
 	while (true)
 	{
  	 getJoystickSettings(joystick);
@@ -231,7 +295,25 @@ task main()
 		{
 			lineforw();
 		}
-	displayCenteredBigTextLine(5, "%f", getBatteryVoltage());
+		if(joy1Btn(Btn8) == 1)
+		{
+			lineforwup();
+		}
+		if(joy1Btn(Btn7) == 1)
+		{
+			while(joy1Btn(Btn9) != 1){
+			if(flag==0){linezig1();}
+					else {linezig2();}}
+		}
+		if(joystick.joy1_TopHat == 0)
+		{
+			forward();
+		}
+	if(joystick.joy1_TopHat == 4)
+		{
+			backward();
+		}
+	 displayCenteredBigTextLine(5, "%f", getBatteryVoltage());
  	 sleep(1);
 	}
 }
